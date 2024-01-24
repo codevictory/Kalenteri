@@ -1,7 +1,39 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Kalenteri</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Livonsaaren Osuuspuutarha</h1>
 
-Welcome to your new app.
+@foreach (var date in dates)
+{
+    <button class="btn btn-primary" style="@StyleForState(date.State)"
+    @onclick="() => HandleClick(date.Day)">@date.State</button>
+}
+
+@code {
+    private int currentCount = 0;
+    private List<Date> dates = new List<Date>([
+    new Date { Day = 1, State = true },
+new Date { Day = 2, State = true },
+new Date { Day = 3, State = false },
+new Date { Day = 4, State = true },
+new Date { Day = 5, State = false }
+    ]);
+
+    private string StyleForState(bool state)
+    {
+        if (state) return "background:lightgreen";
+        return "background:red";
+    }
+
+    private void HandleClick(int day)
+    {
+        dates.Single(date => date.State = !date.State);
+    }
+
+    class Date
+    {
+        public int Day { get; set; }
+        public bool State { get; set; }
+    }
+}
