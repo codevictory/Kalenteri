@@ -1,39 +1,63 @@
-﻿@page "/"
+﻿@using Kalenteri.Backend.Models
+
+@page "/"
+@rendermode InteractiveServer
 
 <PageTitle>Kalenteri</PageTitle>
 
 <h1>Livonsaaren Osuuspuutarha</h1>
 
-@foreach (var date in dates)
-{
-    <button class="btn btn-primary" style="@StyleForState(date.State)"
-    @onclick="() => HandleClick(date.Day)">@date.State</button>
-}
+<div class="calendar">
+    <span class="week-day-header">Ma</span>
+    <span>Ti</span>
+    <span>Ke</span>
+    <span>To</span>
+    <span>Pe</span>
+    <span>La</span>
+    <span>Su</span>
+    @for (int day = 1; day < 31; day++)
+    {
+        var delivery = orders.Single(x => x.Identifier == "asd").Boxes.SingleOrDefault(x => x.Delivery.Day == day);
+        if (delivery != null)
+        {
+            <button class="btn btn-primary" @onclick="@(_ => HandleClick(delivery.Delivery))"
+                style="@StyleForState(delivery.PickUp != null)">@day</button>
+        }
+        else
+        {
+            <button class="btn btn-primary" disabled>@day</button>
+        }
+    }
+</div>
 
 @code {
-    private int currentCount = 0;
-    private List<Date> dates = new List<Date>([
-    new Date { Day = 1, State = true },
-new Date { Day = 2, State = true },
-new Date { Day = 3, State = false },
-new Date { Day = 4, State = true },
-new Date { Day = 5, State = false }
-    ]);
-
     private string StyleForState(bool state)
     {
         if (state) return "background:lightgreen";
         return "background:red";
     }
 
-    private void HandleClick(int day)
+    private void HandleClick(DateTime delivery)
     {
-        dates.Single(date => date.State = !date.State);
+        if (orders.Single(x => x.Identifier == "asd").Boxes.Single(y => y.Delivery == delivery).PickUp == null)
+        {
+            orders.Single(x => x.Identifier == "asd").Boxes.Single(y => y.Delivery == delivery).PickUp = DateTime.Now;
+
+        }
+        else
+        {
+            orders.Single(x => x.Identifier == "asd").Boxes.Single(y => y.Delivery == delivery).PickUp = null;
+        }
     }
 
-    class Date
-    {
-        public int Day { get; set; }
-        public bool State { get; set; }
-    }
+
+    private List<Order> orders = new List<Order>() {
+new Order() {Identifier = "asd", Location = "qwe", Boxes = new List<Box>() {
+new Box() { Delivery = DateTime.Now, PickUp = DateTime.Now },
+new Box() { Delivery = DateTime.Now.AddDays(1), PickUp = DateTime.Now },
+new Box() { Delivery = DateTime.Now.AddDays(4), PickUp = null },
+new Box() { Delivery = DateTime.Now.AddDays(12), PickUp = null },
+new Box() { Delivery = DateTime.Now.AddDays(18), PickUp = null }
+}}
+};
 }

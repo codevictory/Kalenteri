@@ -1,0 +1,9 @@
+.calendar {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: auto auto auto auto auto auto auto;
+}
+
+.week-day-header {
+    text-align: center;
+}
