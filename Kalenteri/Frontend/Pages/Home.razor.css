@@ -2,8 +2,24 @@
     display: grid;
     gap: 1rem;
     grid-template-columns: auto auto auto auto auto auto auto;
+    text-align: center;
+    margin-bottom: 2rem;
 }
 
-.week-day-header {
+.month-navigation {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.month-title {
     text-align: center;
+}
+
+.month-nav-btn {
+    background-color: #d4f0dd;
+}
+
+.empty-btn {
+    background-color: #d4f0dd;
 }
