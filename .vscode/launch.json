@@ -36,7 +36,7 @@
                 "Kalenteri",
                 "--verbose" // Let's us confirm browser connects with hot reload capabilities
             ],
-            "preLaunchTask": "build" // Ensure we don't watch an unbuilt site
+            "preLaunchTask": "dotnet: build",
         },
         {
             "name": "Attach",
