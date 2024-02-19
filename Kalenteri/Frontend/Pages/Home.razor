@@ -1,39 +1,116 @@
-﻿@page "/"
+﻿@using Kalenteri.Backend.Models
+@using System.Globalization
+
+@page "/"
+@rendermode InteractiveServer
 
 <PageTitle>Kalenteri</PageTitle>
 
-<h1>Livonsaaren Osuuspuutarha</h1>
+<p>Käyttäjä: <b>@userId</b></p>
+<p>Jakopaikka: <b>@location</b></p>
 
-@foreach (var date in dates)
-{
-    <button class="btn btn-primary" style="@StyleForState(date.State)"
-    @onclick="() => HandleClick(date.Day)">@date.State</button>
-}
+<h2 class="month-title">
+    @MonthToString()kuu
+</h2>
+
+<div class="calendar">
+    <span>Ma</span>
+    <span>Ti</span>
+    <span>Ke</span>
+    <span>To</span>
+    <span>Pe</span>
+    <span>La</span>
+    <span>Su</span>
+    @for (int pad = 0; pad < GetFirstWeekPadding(); pad++)
+    {
+        <span class="week-day-padding" />
+    }
+    @for (int day = 1; day <= DateTime.DaysInMonth(year, month); day++)
+    {
+        var order = orders.Single(x => x.Identifier == "Testi");
+        var delivery = order.Boxes.SingleOrDefault(x => x.Delivery.Day == day && x.Delivery.Month == month);
+
+        if (delivery != null)
+        {
+            <button class="btn" @onclick="@(_ => HandlePickUpClick(delivery.Delivery))"
+                style="@StyleForState(delivery.PickUp == null)">@day</button>
+        }
+        else
+        {
+            <button class="btn empty-btn" disabled>@day</button>
+        }
+    }
+</div>
+
+<div class="month-navigation">
+    <button class="btn month-nav-btn" @onclick="DecreaseMonth">Edellinen</button>
+    <button class="btn month-nav-btn" @onclick="IncreaseMonth">Seuraava</button>
+</div>
 
 @code {
-    private int currentCount = 0;
-    private List<Date> dates = new List<Date>([
-    new Date { Day = 1, State = true },
-new Date { Day = 2, State = true },
-new Date { Day = 3, State = false },
-new Date { Day = 4, State = true },
-new Date { Day = 5, State = false }
-    ]);
+    private int month = DateTime.Now.Month;
+    private int year = DateTime.Now.Year;
+    private string userId = "Testi";
+    private string location = "Testikatu 16, 12345 Testilandia";
+
+    private void DecreaseMonth()
+    {
+        if (month != 1)
+        {
+            month--;
+        }
+    }
+
+    private void IncreaseMonth()
+    {
+        if (month != 12)
+        {
+            month++;
+        }
+    }
+
+    private string MonthToString()
+    {
+        return CultureInfo.CreateSpecificCulture("fi")
+        .TextInfo.ToTitleCase(CultureInfo.CreateSpecificCulture("fi")
+        .DateTimeFormat.GetAbbreviatedMonthName(month));
+    }
+
+    private int GetFirstWeekPadding()
+    {
+        var weekDayNumber = (int)new DateTime(year, month, 1).DayOfWeek;
+        return weekDayNumber == 0 ? 6 : weekDayNumber - 1;
+    }
 
     private string StyleForState(bool state)
     {
-        if (state) return "background:lightgreen";
-        return "background:red";
+        if (state) return "background:lime";
+        return "background:cornflowerblue";
     }
 
-    private void HandleClick(int day)
+    private void HandlePickUpClick(DateTime delivery)
     {
-        dates.Single(date => date.State = !date.State);
+        var box = orders.Single(x => x.Identifier == userId).Boxes.Single(y => y.Delivery == delivery);
+
+        if (box.PickUp == null)
+        {
+            box.PickUp = DateTime.Now;
+
+        }
+        else
+        {
+            box.PickUp = null;
+        }
     }
 
-    class Date
-    {
-        public int Day { get; set; }
-        public bool State { get; set; }
-    }
+
+    private List<Order> orders = new List<Order>() {
+new Order() {Identifier = "Testi", Location = "Testikatu 16, 12345 Testilandia", Boxes = new List<Box>() {
+new Box() { Delivery = DateTime.Now, PickUp = DateTime.Now },
+new Box() { Delivery = DateTime.Now.AddDays(1), PickUp = DateTime.Now },
+new Box() { Delivery = DateTime.Now.AddDays(4), PickUp = null },
+new Box() { Delivery = DateTime.Now.AddDays(12), PickUp = null },
+new Box() { Delivery = DateTime.Now.AddDays(18), PickUp = null }
+}}
+};
 }

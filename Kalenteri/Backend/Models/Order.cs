@@ -11,5 +11,5 @@ public class Order
 public class Box
 {
     public DateTime Delivery { get; set; }
-    public DateTime PickUp { get; set; }
+    public DateTime? PickUp { get; set; }
 }
