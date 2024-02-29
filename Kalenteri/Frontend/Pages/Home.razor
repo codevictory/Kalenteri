@@ -5,11 +5,6 @@
 @page "/"
 @rendermode InteractiveServer
 
-@if (order == null)
-{
-    getData();
-}
-
 <PageTitle>Kalenteri</PageTitle>
 
 <p>Käyttäjä: <b>@userId</b></p>
@@ -58,7 +53,8 @@
     private int year = DateTime.Now.Year;
     private string userId = "testi";
     private string location = "";
-    private Order order = null;    
+    private Order order = null;
+
     
     private void DecreaseMonth()
     {
@@ -110,14 +106,12 @@
             box.PickUp = null;
         }
     }
-
-    private void getData()
+    
+    protected override void OnInitialized()
     {
-        var result = Task.Run(() => OrderServices.getData("raparperi"));
-        order = result.Result;
+        //todo: Jostain syystä tätä kutsutaan kahdesti
+        order = OrderServices.GetData("raparperi");
         userId = order.Identifier;
         location = order.Location;
-        StateHasChanged();
     }
-    
 }
