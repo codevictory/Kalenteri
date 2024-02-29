@@ -1,8 +1,14 @@
 ﻿@using Kalenteri.Backend.Models
 @using System.Globalization
+@using Kalenteri.Backend.Services
 
 @page "/"
 @rendermode InteractiveServer
+
+@if (order == null)
+{
+    getData();
+}
 
 <PageTitle>Kalenteri</PageTitle>
 
@@ -27,13 +33,12 @@
     }
     @for (int day = 1; day <= DateTime.DaysInMonth(year, month); day++)
     {
-        var order = orders.Single(x => x.Identifier == "Testi");
         var delivery = order.Boxes.SingleOrDefault(x => x.Delivery.Day == day && x.Delivery.Month == month);
 
         if (delivery != null)
         {
             <button class="btn" @onclick="@(_ => HandlePickUpClick(delivery.Delivery))"
-                style="@StyleForState(delivery.PickUp == null)">@day</button>
+                    style="@StyleForState(delivery.PickUp == null)">@day</button>
         }
         else
         {
@@ -47,12 +52,14 @@
     <button class="btn month-nav-btn" @onclick="IncreaseMonth">Seuraava</button>
 </div>
 
+
 @code {
     private int month = DateTime.Now.Month;
     private int year = DateTime.Now.Year;
-    private string userId = "Testi";
-    private string location = "Testikatu 16, 12345 Testilandia";
-
+    private string userId = "testi";
+    private string location = "";
+    private Order order = null;    
+    
     private void DecreaseMonth()
     {
         if (month != 1)
@@ -90,7 +97,8 @@
 
     private void HandlePickUpClick(DateTime delivery)
     {
-        var box = orders.Single(x => x.Identifier == userId).Boxes.Single(y => y.Delivery == delivery);
+        
+        var box = order.Boxes.Single(y => y.Delivery == delivery);
 
         if (box.PickUp == null)
         {
@@ -103,14 +111,13 @@
         }
     }
 
-
-    private List<Order> orders = new List<Order>() {
-new Order() {Identifier = "Testi", Location = "Testikatu 16, 12345 Testilandia", Boxes = new List<Box>() {
-new Box() { Delivery = DateTime.Now, PickUp = DateTime.Now },
-new Box() { Delivery = DateTime.Now.AddDays(1), PickUp = DateTime.Now },
-new Box() { Delivery = DateTime.Now.AddDays(4), PickUp = null },
-new Box() { Delivery = DateTime.Now.AddDays(12), PickUp = null },
-new Box() { Delivery = DateTime.Now.AddDays(18), PickUp = null }
-}}
-};
+    private void getData()
+    {
+        var result = Task.Run(() => OrderServices.getData("raparperi"));
+        order = result.Result;
+        userId = order.Identifier;
+        location = order.Location;
+        StateHasChanged();
+    }
+    
 }
