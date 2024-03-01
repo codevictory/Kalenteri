@@ -7,7 +7,6 @@ public static class OrderServices
 {
     
     private static readonly IConfiguration Configuration = new ConfigurationBuilder()
-        .SetBasePath(Directory.GetCurrentDirectory())
         .AddJsonFile("appsettings.json", optional:false, reloadOnChange:true)
         .Build();
     private static readonly string? EndpointUrl = Configuration["ConnectionStrings:EndpointUrl"];
