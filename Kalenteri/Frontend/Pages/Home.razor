@@ -3,7 +3,7 @@
 @using Kalenteri.Backend.Services
 
 @page "/"
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
 
 <PageTitle>Kalenteri</PageTitle>
 
@@ -105,11 +105,22 @@
         {
             box.PickUp = null;
         }
+        
+        UpdateData();
     }
+
+
+    private async void UpdateData()
+    {
+        var result = Task.Run(() => OrderServices.UpdateData(order));
+        order = result.Result.Resource;
+        StateHasChanged();
+    }
+    
+    
     
     protected override void OnInitialized()
     {
-        //todo: Jostain syystä tätä kutsutaan kahdesti
         order = OrderServices.GetData("raparperi");
         userId = order.Identifier;
         location = order.Location;

@@ -17,14 +17,23 @@ public static class OrderServices
     
     public static Order GetData(string identifier)
     {
-        CosmosClient cosmosClient = new CosmosClient(EndpointUrl, PrimaryKey);
-        Database database = cosmosClient.GetDatabase(DatabaseId);
-        Container container = database.GetContainer(ContainerId);
-        
+        Container container = CreateContainer();
         return container.GetItemLinqQueryable<Order>(true)
             .Where(o => o.Identifier == identifier)
             .ToList().First();
     }
-    
+
+
+    public static Task<ItemResponse<Order>> UpdateData(Order order)
+    {
+        Container container = CreateContainer();
+        return container.UpsertItemAsync(order);
+    }
+
+    private static Container CreateContainer()
+    {
+        return new CosmosClient(EndpointUrl, PrimaryKey)
+            .GetDatabase(DatabaseId).GetContainer(ContainerId);
+    }
     
 }
