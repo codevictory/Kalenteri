@@ -1,58 +1,69 @@
 ﻿@using Kalenteri.Backend.Models
 @using System.Globalization
+@using Kalenteri.Backend.Services
 
 @page "/"
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
 
 <PageTitle>Kalenteri</PageTitle>
 
-<p>Käyttäjä: <b>@userId</b></p>
-<p>Jakopaikka: <b>@location</b></p>
+<h1>KALENTERI</h1>
 
-<h2 class="month-title">
-    @MonthToString()kuu
-</h2>
+@if (loginId != null)
+{
+    <p>Käyttäjä: <b>@userId</b></p>
+    <p>Jakopaikka: <b>@location</b></p>
 
-<div class="calendar">
-    <span>Ma</span>
-    <span>Ti</span>
-    <span>Ke</span>
-    <span>To</span>
-    <span>Pe</span>
-    <span>La</span>
-    <span>Su</span>
-    @for (int pad = 0; pad < GetFirstWeekPadding(); pad++)
-    {
-        <span class="week-day-padding" />
-    }
-    @for (int day = 1; day <= DateTime.DaysInMonth(year, month); day++)
-    {
-        var order = orders.Single(x => x.Identifier == "Testi");
-        var delivery = order.Boxes.SingleOrDefault(x => x.Delivery.Day == day && x.Delivery.Month == month);
+    <h2 class="month-title">
+        @MonthToString()kuu
+    </h2>
 
-        if (delivery != null)
+    <div class="calendar">
+        <span>Ma</span>
+        <span>Ti</span>
+        <span>Ke</span>
+        <span>To</span>
+        <span>Pe</span>
+        <span>La</span>
+        <span>Su</span>
+        @for (int pad = 0; pad < GetFirstWeekPadding(); pad++)
         {
-            <button class="btn" @onclick="@(_ => HandlePickUpClick(delivery.Delivery))"
-                style="@StyleForState(delivery.PickUp == null)">@day</button>
+            <span class="week-day-padding" />
         }
-        else
+        @for (int day = 1; day <= DateTime.DaysInMonth(year, month); day++)
         {
-            <button class="btn empty-btn" disabled>@day</button>
-        }
-    }
-</div>
+            var delivery = order.Boxes.SingleOrDefault(x => x.Delivery.Day == day && x.Delivery.Month == month);
 
-<div class="month-navigation">
-    <button class="btn month-nav-btn" @onclick="DecreaseMonth">Edellinen</button>
-    <button class="btn month-nav-btn" @onclick="IncreaseMonth">Seuraava</button>
-</div>
+            if (delivery != null)
+            {
+                <button class="btn" @onclick="@(_ => HandlePickUpClick(delivery.Delivery))"
+                        style="@StyleForState(delivery.PickUp == null)">@day</button>
+            }
+            else
+            {
+                <button class="btn empty-btn" disabled>@day</button>
+            }
+        }
+    </div>
+
+    <div class="month-navigation">
+        <button class="btn month-nav-btn" @onclick="DecreaseMonth">Edellinen</button>
+        <button class="btn month-nav-btn" @onclick="IncreaseMonth">Seuraava</button>
+    </div>
+}
+<Login  @ref="loginRef" LoginCallback="LoginComplete" />
 
 @code {
+    private string loginId = null; 
     private int month = DateTime.Now.Month;
     private int year = DateTime.Now.Year;
-    private string userId = "Testi";
-    private string location = "Testikatu 16, 12345 Testilandia";
-
+    private string userId = "testi";
+    private string location = "";
+    private Order order = null;
+    private Login loginRef;
+    private string statusText;
+    
+    
     private void DecreaseMonth()
     {
         if (month != 1)
@@ -90,7 +101,8 @@
 
     private void HandlePickUpClick(DateTime delivery)
     {
-        var box = orders.Single(x => x.Identifier == userId).Boxes.Single(y => y.Delivery == delivery);
+        
+        var box = order.Boxes.Single(y => y.Delivery == delivery);
 
         if (box.PickUp == null)
         {
@@ -101,16 +113,32 @@
         {
             box.PickUp = null;
         }
+        
+        UpdateData();
     }
 
 
-    private List<Order> orders = new List<Order>() {
-new Order() {Identifier = "Testi", Location = "Testikatu 16, 12345 Testilandia", Boxes = new List<Box>() {
-new Box() { Delivery = DateTime.Now, PickUp = DateTime.Now },
-new Box() { Delivery = DateTime.Now.AddDays(1), PickUp = DateTime.Now },
-new Box() { Delivery = DateTime.Now.AddDays(4), PickUp = null },
-new Box() { Delivery = DateTime.Now.AddDays(12), PickUp = null },
-new Box() { Delivery = DateTime.Now.AddDays(18), PickUp = null }
-}}
-};
+    private async void UpdateData()
+    {
+        var result = Task.Run(() => OrderServices.UpdateData(order));
+        order = result.Result.Resource;
+        StateHasChanged();
+    }
+    
+    protected override void OnAfterRender ( bool firstRender ) 
+    {
+        if (loginId == null)
+        {
+            loginRef.Show();
+        }
+    }
+
+    private void LoginComplete(String id)
+    {
+        loginId = id;
+        order = OrderServices.GetData(loginId);
+        userId = order.Identifier;
+        location = order.Location;
+    }
+    
 }
