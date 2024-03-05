@@ -119,7 +119,7 @@
 
     private async void UpdateData()
     {
-        var result = Task.Run(() => OrderServices.UpdateData(_order));
+        var result = Task.Run(() => OrderServices.UpdateData(_order!));
         _order = result.Result.Resource;
         StateHasChanged();
     }
