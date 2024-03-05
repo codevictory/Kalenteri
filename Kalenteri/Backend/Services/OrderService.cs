@@ -14,14 +14,14 @@ public static class OrderServices
     private static readonly string? DatabaseId = Configuration["ConnectionStrings:DatabaseId"];
     private static readonly string? ContainerId = Configuration["ConnectionStrings:ContainerId"];
     
-    public static Order GetData(string identifier)
+    public static Order? GetData(string identifier)
     {
         Container container = CreateContainer();
         try
         {
             return container.GetItemLinqQueryable<Order>(true)
                 .Where(o => o.Identifier == identifier)
-                .ToList().First();
+                .ToList().FirstOrDefault();
         }
         catch(InvalidOperationException e)
         {

@@ -13,7 +13,7 @@
             <button type="button" class="btn-close" aria-label="Close" @onclick="Close"></button>
         </div>
 
-        <EditForm EditContext="editContext" OnSubmit="Submit" FormName="Login">
+        <EditForm EditContext="_editContext" OnSubmit="Submit" FormName="Login">
             <DataAnnotationsValidator />
             <div class="toast-body">
                 <label>
@@ -31,9 +31,9 @@
 
 @code {
 
-    private EditContext? editContext;
+    private EditContext? _editContext;
     
-    private ValidationMessageStore? messageStore;
+    private ValidationMessageStore? _messageStore;
 
     [SupplyParameterFromForm]
     private LoginData? Model { get; set; }
@@ -63,16 +63,16 @@
             {
                 Id = "",
             };
-        editContext = new(Model);
-        messageStore = new ValidationMessageStore(editContext);
+        _editContext = new(Model);
+        _messageStore = new ValidationMessageStore(_editContext);
     }
     
     private async Task Submit()
     {
-        messageStore.Clear();
-        if (editContext != null && editContext.Validate())
+        _messageStore!.Clear();
+        if (_editContext != null && _editContext.Validate())
         {
-            Order order = OrderServices.GetData(Model.Id);
+            Order? order = OrderServices.GetData(Model!.Id!);
 
             if (order != null)
             {
@@ -81,8 +81,8 @@
             }
             else
             {
-                messageStore.Add(() => Model.Id, "Kirjautuminen epäonnistui!");
-                editContext.NotifyValidationStateChanged();
+                _messageStore.Add(() => Model!.Id!, "Kirjautuminen epäonnistui!");
+                _editContext.NotifyValidationStateChanged();
             }
         }
     }

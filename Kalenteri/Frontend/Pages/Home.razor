@@ -9,10 +9,10 @@
 
 <h1>KALENTERI</h1>
 
-@if (loginId != null)
+@if (_loginId != null)
 {
-    <p>Käyttäjä: <b>@userId</b></p>
-    <p>Jakopaikka: <b>@location</b></p>
+    <p>Käyttäjä: <b>@_userId</b></p>
+    <p>Jakopaikka: <b>@_location</b></p>
 
     <h2 class="month-title">
         @MonthToString()kuu
@@ -30,9 +30,9 @@
         {
             <span class="week-day-padding" />
         }
-        @for (int day = 1; day <= DateTime.DaysInMonth(year, month); day++)
+        @for (int day = 1; day <= DateTime.DaysInMonth(_year, _month); day++)
         {
-            var delivery = order.Boxes.SingleOrDefault(x => x.Delivery.Day == day && x.Delivery.Month == month);
+            var delivery = _order!.Boxes.SingleOrDefault(x => x.Delivery.Day == day && x.Delivery.Month == _month);
 
             if (delivery != null)
             {
@@ -51,32 +51,31 @@
         <button class="btn month-nav-btn" @onclick="IncreaseMonth">Seuraava</button>
     </div>
 }
-<Login  @ref="loginRef" LoginCallback="LoginComplete" />
+<Login  @ref="_loginRef" LoginCallback="LoginComplete" />
 
 @code {
-    private string loginId = null; 
-    private int month = DateTime.Now.Month;
-    private int year = DateTime.Now.Year;
-    private string userId = "testi";
-    private string location = "";
-    private Order order = null;
-    private Login loginRef;
-    private string statusText;
+    private string? _loginId = null; 
+    private int _month = DateTime.Now.Month;
+    private readonly int _year = DateTime.Now.Year;
+    private string _userId = "testi";
+    private string _location = "";
+    private Order? _order = null;
+    private Login? _loginRef;
     
     
     private void DecreaseMonth()
     {
-        if (month != 1)
+        if (_month != 1)
         {
-            month--;
+            _month--;
         }
     }
 
     private void IncreaseMonth()
     {
-        if (month != 12)
+        if (_month != 12)
         {
-            month++;
+            _month++;
         }
     }
 
@@ -84,12 +83,12 @@
     {
         return CultureInfo.CreateSpecificCulture("fi")
         .TextInfo.ToTitleCase(CultureInfo.CreateSpecificCulture("fi")
-        .DateTimeFormat.GetAbbreviatedMonthName(month));
+        .DateTimeFormat.GetAbbreviatedMonthName(_month));
     }
 
     private int GetFirstWeekPadding()
     {
-        var weekDayNumber = (int)new DateTime(year, month, 1).DayOfWeek;
+        var weekDayNumber = (int)new DateTime(_year, _month, 1).DayOfWeek;
         return weekDayNumber == 0 ? 6 : weekDayNumber - 1;
     }
 
@@ -102,7 +101,7 @@
     private void HandlePickUpClick(DateTime delivery)
     {
         
-        var box = order.Boxes.Single(y => y.Delivery == delivery);
+        var box = _order!.Boxes.Single(y => y.Delivery == delivery);
 
         if (box.PickUp == null)
         {
@@ -120,25 +119,25 @@
 
     private async void UpdateData()
     {
-        var result = Task.Run(() => OrderServices.UpdateData(order));
-        order = result.Result.Resource;
+        var result = Task.Run(() => OrderServices.UpdateData(_order));
+        _order = result.Result.Resource;
         StateHasChanged();
     }
     
     protected override void OnAfterRender ( bool firstRender ) 
     {
-        if (loginId == null)
+        if (_loginId == null)
         {
-            loginRef.Show();
+            _loginRef!.Show();
         }
     }
 
     private void LoginComplete(Order order)
     {
-        this.order = order;
-        loginId = order.Identifier;
-        userId = order.Identifier;
-        location = order.Location;
+        _order = order;
+        _loginId = order.Identifier;
+        _userId = order.Identifier;
+        _location = order.Location;
     }
     
 }
