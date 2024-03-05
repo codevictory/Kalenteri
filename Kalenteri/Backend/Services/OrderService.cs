@@ -17,9 +17,16 @@ public static class OrderServices
     public static Order GetData(string identifier)
     {
         Container container = CreateContainer();
-        return container.GetItemLinqQueryable<Order>(true)
-            .Where(o => o.Identifier == identifier)
-            .ToList().First();
+        try
+        {
+            return container.GetItemLinqQueryable<Order>(true)
+                .Where(o => o.Identifier == identifier)
+                .ToList().First();
+        }
+        catch(InvalidOperationException e)
+        {
+            return null; 
+        }
     }
 
 

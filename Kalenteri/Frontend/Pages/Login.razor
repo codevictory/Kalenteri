@@ -1,5 +1,6 @@
 @using System.ComponentModel.DataAnnotations
 @using Kalenteri.Backend.Models
+@using Kalenteri.Backend.Services
 @inject NavigationManager NavManager
 @{
     var showClass = IsVisible ? "d-block" : "d-none";
@@ -20,6 +21,7 @@
                     <InputText @bind-Value="Model!.Id" />
                 </label>
             </div>
+            <ValidationSummary />
             <div class="toast-body">
                 <button type="submit" class="btn-primary">Kirjaudu</button>
             </div>
@@ -30,6 +32,8 @@
 @code {
 
     private EditContext? editContext;
+    
+    private ValidationMessageStore? messageStore;
 
     [SupplyParameterFromForm]
     private LoginData? Model { get; set; }
@@ -38,7 +42,7 @@
     public bool IsVisible { get; set; }
 
     [Parameter]
-    public EventCallback<string> LoginCallback { get; set; }
+    public EventCallback<Order> LoginCallback { get; set; }
     
     public void Show()
     {
@@ -60,14 +64,26 @@
                 Id = "",
             };
         editContext = new(Model);
+        messageStore = new ValidationMessageStore(editContext);
     }
     
     private async Task Submit()
     {
+        messageStore.Clear();
         if (editContext != null && editContext.Validate())
         {
-            Close();
-            await LoginCallback.InvokeAsync(Model.Id);
+            Order order = OrderServices.GetData(Model.Id);
+
+            if (order != null)
+            {
+                await LoginCallback.InvokeAsync(order);
+                Close();
+            }
+            else
+            {
+                messageStore.Add(() => Model.Id, "Kirjautuminen epäonnistui!");
+                editContext.NotifyValidationStateChanged();
+            }
         }
     }
 }

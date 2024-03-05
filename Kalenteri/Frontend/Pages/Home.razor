@@ -133,10 +133,10 @@
         }
     }
 
-    private void LoginComplete(String id)
+    private void LoginComplete(Order order)
     {
-        loginId = id;
-        order = OrderServices.GetData(loginId);
+        this.order = order;
+        loginId = order.Identifier;
         userId = order.Identifier;
         location = order.Location;
     }
