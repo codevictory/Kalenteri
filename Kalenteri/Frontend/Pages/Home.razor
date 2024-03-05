@@ -9,7 +9,7 @@
 
 <h1>KALENTERI</h1>
 
-@if (_loginId != null)
+@if (_order != null)
 {
     <p>Käyttäjä: <b>@_userId</b></p>
     <p>Jakopaikka: <b>@_location</b></p>
@@ -54,10 +54,9 @@
 <Login  @ref="_loginRef" LoginCallback="LoginComplete" />
 
 @code {
-    private string? _loginId = null; 
     private int _month = DateTime.Now.Month;
     private readonly int _year = DateTime.Now.Year;
-    private string _userId = "testi";
+    private string _userId = "";
     private string _location = "";
     private Order? _order = null;
     private Login? _loginRef;
@@ -126,7 +125,7 @@
     
     protected override void OnAfterRender ( bool firstRender ) 
     {
-        if (_loginId == null)
+        if (_order == null)
         {
             _loginRef!.Show();
         }
@@ -135,7 +134,6 @@
     private void LoginComplete(Order order)
     {
         _order = order;
-        _loginId = order.Identifier;
         _userId = order.Identifier;
         _location = order.Location;
     }
