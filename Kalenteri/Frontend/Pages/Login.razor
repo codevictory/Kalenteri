@@ -1,5 +1,6 @@
 @using System.ComponentModel.DataAnnotations
 @using Kalenteri.Backend.Models
+@using Kalenteri.Backend.Services
 @inject NavigationManager NavManager
 @{
     var showClass = IsVisible ? "d-block" : "d-none";
@@ -12,7 +13,7 @@
             <button type="button" class="btn-close" aria-label="Close" @onclick="Close"></button>
         </div>
 
-        <EditForm EditContext="editContext" OnSubmit="Submit" FormName="Login">
+        <EditForm EditContext="_editContext" OnSubmit="Submit" FormName="Login">
             <DataAnnotationsValidator />
             <div class="toast-body">
                 <label>
@@ -20,6 +21,7 @@
                     <InputText @bind-Value="Model!.Id" />
                 </label>
             </div>
+            <ValidationSummary />
             <div class="toast-body">
                 <button type="submit" class="btn-primary">Kirjaudu</button>
             </div>
@@ -29,7 +31,9 @@
 
 @code {
 
-    private EditContext? editContext;
+    private EditContext? _editContext;
+    
+    private ValidationMessageStore? _messageStore;
 
     [SupplyParameterFromForm]
     private LoginData? Model { get; set; }
@@ -38,7 +42,7 @@
     public bool IsVisible { get; set; }
 
     [Parameter]
-    public EventCallback<string> LoginCallback { get; set; }
+    public EventCallback<Order> LoginCallback { get; set; }
     
     public void Show()
     {
@@ -59,15 +63,27 @@
             {
                 Id = "",
             };
-        editContext = new(Model);
+        _editContext = new(Model);
+        _messageStore = new ValidationMessageStore(_editContext);
     }
     
     private async Task Submit()
     {
-        if (editContext != null && editContext.Validate())
+        _messageStore!.Clear();
+        if (_editContext != null && _editContext.Validate())
         {
-            Close();
-            await LoginCallback.InvokeAsync(Model.Id);
+            Order? order = OrderServices.GetData(Model!.Id!);
+
+            if (order != null)
+            {
+                await LoginCallback.InvokeAsync(order);
+                Close();
+            }
+            else
+            {
+                _messageStore.Add(() => Model!.Id!, "Kirjautuminen epäonnistui!");
+                _editContext.NotifyValidationStateChanged();
+            }
         }
     }
 }
