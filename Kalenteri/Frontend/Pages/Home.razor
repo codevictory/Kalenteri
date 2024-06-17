@@ -112,17 +112,11 @@
             box.PickUp = null;
         }
         
-        UpdateData();
-    }
-
-
-    private async void UpdateData()
-    {
-        var result = Task.Run(() => OrderServices.UpdateData(_order!));
-        _order = result.Result.Resource;
+        _order = OrderPossuService.UpdateData(_order.Identifier, box);
         StateHasChanged();
     }
-    
+
+
     protected override void OnAfterRender ( bool firstRender ) 
     {
         if (_order == null)
