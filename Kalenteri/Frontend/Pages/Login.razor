@@ -72,9 +72,9 @@
         _messageStore!.Clear();
         if (_editContext != null && _editContext.Validate())
         {
-            Order? order = OrderServices.GetData(Model!.Id!);
+            Order order = OrderPossuService.GetData(Model!.Id!);
 
-            if (order != null)
+            if (order.id != Guid.Empty)
             {
                 await LoginCallback.InvokeAsync(order);
                 Close();
