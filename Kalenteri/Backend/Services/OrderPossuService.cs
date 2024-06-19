@@ -14,9 +14,9 @@ namespace Kalenteri.Backend.Services;
 public static class OrderPossuService
 {
     private static readonly IConfiguration Configuration = new ConfigurationBuilder()
-        .AddJsonFile("appsettings.json", optional:false, reloadOnChange:true)
+        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
         .Build();
-    private static readonly string? ConnectionString = Configuration["ConnectionStrings:DataSource"];
+    private static readonly string? ConnectionString = Configuration["DbConnectionString"];
 
 
     /*
@@ -44,18 +44,18 @@ public static class OrderPossuService
        
     
      */
-    
-    
+
+
     public static Order UpdateData(string identifier, Box box)
     {
         IDbConnection db = CreateConnection();
         db.Update(box);
         db.Close();
-        
-        return GetData(identifier); 
+
+        return GetData(identifier);
     }
 
-    
+
     public static Order GetData(string identifier)
     {
         IDbConnection db = CreateConnection();
@@ -66,7 +66,7 @@ public static class OrderPossuService
 
         var results = db.SelectMulti<Order, Box>(q);
 
-        Order order = new Order(); 
+        Order order = new Order();
         foreach (var tuple in results)
         {
             if (order.Identifier == String.Empty)
@@ -77,10 +77,10 @@ public static class OrderPossuService
             order.Boxes.Add(box);
         }
 
-        return order; 
+        return order;
     }
 
-    
+
     private static IDbConnection CreateConnection()
     {
         PostgreSqlDialect.Provider.RegisterConverter<List<DateTime>>(new PostgreSqlDateTimeTimeStampArrayConverter());
