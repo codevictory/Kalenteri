@@ -25,7 +25,7 @@
             }
         },
         {
-            "name": "Watch",
+            "name": "Kalenteri Local Debug with Hot Reload",
             "type": "coreclr",
             "request": "launch",
             "cwd": "${workspaceFolder}",
@@ -46,15 +46,6 @@
             "browser": "edge",
             "url": "http://localhost:5000", // Tell launch where to find site
             "timeout": 120000, // Allows time for the site to launch
-        }
-    ],
-    "compounds": [
-        {
-            "name": "Kalenteri Local Debug with Hot Reload",
-            "configurations": [
-                "Watch",
-                "Attach"
-            ]
         }
     ]
 }
