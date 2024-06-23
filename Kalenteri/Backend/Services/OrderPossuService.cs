@@ -13,10 +13,10 @@ namespace Kalenteri.Backend.Services;
 
 public static class OrderPossuService
 {
-    private static readonly IConfiguration Configuration = new ConfigurationBuilder()
+    private static readonly IConfiguration configuration = new ConfigurationBuilder()
         .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
         .Build();
-    private static readonly string? ConnectionString = Configuration["DbConnectionString"];
+    private static readonly string? ConnectionString = configuration.GetConnectionString("KalenteriDatabase");
 
 
     /*
