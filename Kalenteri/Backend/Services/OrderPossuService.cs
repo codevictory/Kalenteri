@@ -5,6 +5,7 @@ using System.Data;
 using Kalenteri.Backend.Models;
 using Npgsql;
 using ServiceStack.Data;
+using ServiceStack.Logging;
 using ServiceStack.OrmLite;
 using ServiceStack.OrmLite.PostgreSQL.Converters;
 using ServiceStack.Text;
@@ -83,8 +84,14 @@ public static class OrderPossuService
 
     private static IDbConnection CreateConnection()
     {
+        //TODO: TEMP LOGGING, remove
+        using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
+        ILogger logger = factory.CreateLogger("Kalenteri");
+        
         PostgreSqlDialect.Provider.RegisterConverter<List<DateTime>>(new PostgreSqlDateTimeTimeStampArrayConverter());
         var dbFactory = new OrmLiteConnectionFactory(ConnectionString, PostgreSqlDialect.Provider);
+        //TODO: TEMP LOGGING, remove
+        logger.LogInformation("ConnectionString: " + dbFactory.ConnectionString);
         return dbFactory.OpenDbConnection();
     }
 }
