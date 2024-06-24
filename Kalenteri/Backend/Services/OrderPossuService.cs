@@ -3,18 +3,15 @@
 
 using System.Data;
 using Kalenteri.Backend.Models;
-using Npgsql;
-using ServiceStack.Data;
-using ServiceStack.Logging;
 using ServiceStack.OrmLite;
 using ServiceStack.OrmLite.PostgreSQL.Converters;
-using ServiceStack.Text;
 
 namespace Kalenteri.Backend.Services;
 
 public static class OrderPossuService
 {
     private static readonly IConfiguration configuration = new ConfigurationBuilder()
+        .AddEnvironmentVariables()
         .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
         .Build();
     private static readonly string? ConnectionString = configuration.GetConnectionString("KalenteriDatabase");
