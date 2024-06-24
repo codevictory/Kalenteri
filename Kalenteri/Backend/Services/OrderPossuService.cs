@@ -3,6 +3,7 @@
 
 using System.Data;
 using Kalenteri.Backend.Models;
+using ServiceStack;
 using ServiceStack.OrmLite;
 using ServiceStack.OrmLite.PostgreSQL.Converters;
 
@@ -16,6 +17,7 @@ public static class OrderPossuService
         .Build();
     private static readonly string? ConnectionString = configuration.GetConnectionString("KalenteriDatabase");
 
+    
 
     /*
 
@@ -89,6 +91,10 @@ public static class OrderPossuService
         var dbFactory = new OrmLiteConnectionFactory(ConnectionString, PostgreSqlDialect.Provider);
         //TODO: TEMP LOGGING, remove
         logger.LogInformation("ConnectionString: " + dbFactory.ConnectionString);
+        var keys = configuration.AsEnumerable().ToList();
+        foreach (var key in keys) {
+            logger.LogInformation("key: " + key.Key + " value: " + key.Value);
+        }
         return dbFactory.OpenDbConnection();
     }
 }
